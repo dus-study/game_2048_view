@@ -36,6 +36,24 @@ macro_rules! vline {
     };
 }
 
+macro_rules! square {
+    ($square:expr, $view:expr, $color:expr) => {
+        let x = $square.x * $view.window_size as i32 / $view.game_size as i32;
+        let y = $square.y * $view.window_size as i32 / $view.game_size as i32;
+
+        $view.canvas.set_draw_color($color);
+        $view
+            .canvas
+            .fill_rect(Rect::new(
+                x,
+                y,
+                $view.window_size as u32 / $view.game_size as u32,
+                $view.window_size as u32 / $view.game_size as u32,
+            ))
+            .unwrap();
+    };
+}
+
 pub struct Square {
     pub x: i32,
     pub y: i32,
@@ -71,6 +89,8 @@ pub struct View {
     bg_color: Color,
     line_color: Color,
     squares: Vec<Square>,
+    window_size: i32,
+    game_size: i32,
     // font: Font<'a, 'b>,
     // ttf_context: &'a Sdl2TtfContext,
 }
@@ -112,6 +132,8 @@ impl View {
             bg_color,
             line_color,
             squares: vec![],
+            window_size,
+            game_size,
             // font,
             // ttf_context: &ttf_context,
         }
@@ -130,13 +152,7 @@ impl View {
                 s: 0.3,
                 v: 0.8,
             });
-
-            let x = square.x * 200;
-            let y = square.y * 200;
-
-            self.canvas.set_draw_color(color);
-            self.canvas.fill_rect(Rect::new(x, y, 200, 200)).unwrap();
-            // let surface = font.render(square.value as str).unwrap();
+            square!(square, self, color);
         }
         self.canvas.present();
     }
