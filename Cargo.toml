@@ -1,6 +1,6 @@
 [package]
 name = "game_2048_view"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Johan Ullén <johan.ullen@sentian.ai>"]
 edition = "2018"
 
