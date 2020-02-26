@@ -7,9 +7,9 @@ use sdl2::video::Window;
 use sdl2::Sdl;
 
 pub struct Square {
-    x: i32,
-    y: i32,
-    value: u32,
+    pub x: i32,
+    pub y: i32,
+    pub value: u32,
 }
 
 type State = Vec<Square>;
