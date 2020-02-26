@@ -12,19 +12,13 @@ pub struct Square {
     pub value: u32,
 }
 
-struct RGB {
-    r: u8,
-    g: u8,
-    b: u8,
-}
-
 struct HSV {
     h: f64,
     s: f64,
     v: f64,
 }
 
-fn hsv2rgb(hsv: &HSV) -> RGB {
+fn hsv2rgb(hsv: &HSV) -> Color {
     let c = hsv.v * hsv.s;
     let h = (hsv.h % 360.0) / 60.0;
     let x = c * (1.0 - (h % 2.0 - 1.0).abs());
@@ -34,13 +28,8 @@ fn hsv2rgb(hsv: &HSV) -> RGB {
     let ba = [0.0, 0.0, x, c, c, x];
     let hi = h as usize;
     let mk = |a: [f64; 6]| ((a[hi] + m) * 255.0) as u8;
-    RGB {
-        r: mk(ra),
-        g: mk(ga),
-        b: mk(ba),
-    }
+    Color::RGB(mk(ra), mk(ga), mk(ba))
 }
-
 type State = Vec<Square>;
 
 pub struct View {
@@ -102,15 +91,12 @@ impl View {
             self.canvas.draw_line(line.0, line.1).unwrap();
         }
         for square in self.squares.iter() {
-            let color = if square.value == 2 {
-                Color::RGB(0, 0, 255)
-            } else if square.value == 4 {
-                Color::RGB(255, 0, 0)
-            } else if square.value == 8 {
-                Color::RGB(0, 255, 0)
-            } else {
-                Color::RGB(255, 255, 255)
-            };
+            let color = hsv2rgb(&HSV {
+                h: square.value as f64 * 65.0,
+                s: 0.3,
+                v: 0.8,
+            });
+
             let x = square.x * 200;
             let y = square.y * 200;
 
