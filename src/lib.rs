@@ -3,14 +3,46 @@ extern crate sdl2;
 use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::Canvas;
+// use sdl2::ttf::Font;
+// use sdl2::ttf::Sdl2TtfContext;
 use sdl2::video::Window;
 use sdl2::Sdl;
+
+// fn t<T>(_: &T) {
+//     println!("{}", std::any::type_name::<T>());
+// }
+
+macro_rules! hline {
+    ($window_size:expr, $game_size:expr, $i:expr) => {
+        (
+            Point::new(0, $window_size as i32 / $game_size as i32 * $i as i32),
+            Point::new(
+                $window_size as i32,
+                $window_size as i32 / $game_size as i32 * $i as i32,
+            ),
+        )
+    };
+}
+
+macro_rules! vline {
+    ($window_size:expr, $game_size:expr, $i:expr) => {
+        (
+            Point::new($window_size as i32 / $game_size as i32 * $i as i32, 0),
+            Point::new(
+                $window_size as i32 / $game_size as i32 * $i as i32,
+                $window_size as i32,
+            ),
+        )
+    };
+}
 
 pub struct Square {
     pub x: i32,
     pub y: i32,
     pub value: u32,
 }
+
+type Line = (Point, Point);
 
 struct HSV {
     h: f64,
@@ -32,15 +64,18 @@ fn hsv2rgb(hsv: &HSV) -> Color {
 }
 type State = Vec<Square>;
 
+// pub struct View<'a, 'b> {
 pub struct View {
     canvas: Canvas<Window>,
     lines: Vec<(Point, Point)>,
     bg_color: Color,
     line_color: Color,
     squares: Vec<Square>,
-    // font:
+    // font: Font<'a, 'b>,
+    // ttf_context: &'a Sdl2TtfContext,
 }
 
+// impl<'a, 'b> View<'a, 'b> {
 impl View {
     pub fn new(
         sdl_context: &Sdl,
@@ -58,21 +93,18 @@ impl View {
             .unwrap();
 
         let canvas = window.into_canvas().present_vsync().build().unwrap();
-        let mut lines: Vec<(Point, Point)> = vec![];
+        let mut lines: Vec<Line> = vec![];
         let window_size = window_size as i32;
         for i in 1..game_size {
-            lines.push((
-                Point::new(0, window_size / game_size * i),
-                Point::new(window_size, window_size / game_size * i),
-            ));
-            lines.push((
-                Point::new(window_size / game_size * i, 0),
-                Point::new(window_size / game_size * i, window_size),
-            ));
+            lines.push(hline!(window_size, game_size, i));
+            lines.push(vline!(window_size, game_size, i));
         }
 
         // let ttf_context = sdl2::ttf::init().unwrap();
-        // let font = ttf_context.load_font("fonts/DejaVuSansMono-Bold.ttf", 128).unwrap();
+        // let font = ttf_context
+        // .load_font("fonts/DejaVuSansMono-Bold.ttf", 128)
+        // .unwrap();
+        // t(&ttf_context);
 
         View {
             canvas,
@@ -80,6 +112,8 @@ impl View {
             bg_color,
             line_color,
             squares: vec![],
+            // font,
+            // ttf_context: &ttf_context,
         }
     }
 
