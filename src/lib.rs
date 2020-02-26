@@ -12,6 +12,35 @@ pub struct Square {
     pub value: u32,
 }
 
+struct RGB {
+    r: u8,
+    g: u8,
+    b: u8,
+}
+
+struct HSV {
+    h: f64,
+    s: f64,
+    v: f64,
+}
+
+fn hsv2rgb(hsv: &HSV) -> RGB {
+    let c = hsv.v * hsv.s;
+    let h = (hsv.h % 360.0) / 60.0;
+    let x = c * (1.0 - (h % 2.0 - 1.0).abs());
+    let m = hsv.v - c;
+    let ra = [c, x, 0.0, 0.0, x, c];
+    let ga = [x, c, c, x, 0.0, 0.0];
+    let ba = [0.0, 0.0, x, c, c, x];
+    let hi = h as usize;
+    let mk = |a: [f64; 6]| ((a[hi] + m) * 255.0) as u8;
+    RGB {
+        r: mk(ra),
+        g: mk(ga),
+        b: mk(ba),
+    }
+}
+
 type State = Vec<Square>;
 
 pub struct View {
