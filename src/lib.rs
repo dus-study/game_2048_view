@@ -7,6 +7,7 @@ use sdl2::render::Canvas;
 // use sdl2::ttf::Sdl2TtfContext;
 use sdl2::video::Window;
 use sdl2::Sdl;
+use std::format;
 
 // fn t<T>(_: &T) {
 //     println!("{}", std::any::type_name::<T>());
@@ -37,20 +38,44 @@ macro_rules! vline {
 }
 
 macro_rules! square {
-    ($square:expr, $view:expr, $color:expr) => {
+    ($square:expr, $view:expr) => {
         let x = $square.x * $view.window_size as i32 / $view.game_size as i32;
         let y = $square.y * $view.window_size as i32 / $view.game_size as i32;
-
-        $view.canvas.set_draw_color($color);
-        $view
-            .canvas
-            .fill_rect(Rect::new(
-                x,
-                y,
-                $view.window_size as u32 / $view.game_size as u32,
-                $view.window_size as u32 / $view.game_size as u32,
-            ))
+        let color = hsv2rgb(&HSV {
+            h: $square.value as f64 * 65.0,
+            s: 0.3,
+            v: 0.8,
+        });
+        let ttf_context = sdl2::ttf::init().unwrap();
+        let font = ttf_context
+            .load_font("fonts/DejaVuSansMono-Bold.ttf", 128)
             .unwrap();
+        // let font: Font<'ttf_module, 'rwops> = match self.font {
+        //     Some(font) => font,
+        //     None => self
+        //         .ttf_context
+        //         .load_font("fonts/DejaVuSansMono-Bold.ttf", 128)
+        //         .unwrap(),
+        // };
+        // self.font = Some(font);
+        let surface = font
+            .render(format!("{}", $square.value).as_str())
+            .blended(Color::RGB(0, 0, 0))
+            .unwrap();
+        let texture_creator = $view.canvas.texture_creator();
+        let texture = texture_creator
+            .create_texture_from_surface(&surface)
+            .unwrap();
+
+        $view.canvas.set_draw_color(color);
+        let square = Rect::new(
+            x,
+            y,
+            $view.window_size as u32 / $view.game_size as u32,
+            $view.window_size as u32 / $view.game_size as u32,
+        );
+        $view.canvas.fill_rect(square).unwrap();
+        $view.canvas.copy(&texture, None, Some(square)).unwrap();
     };
 }
 
@@ -82,7 +107,7 @@ fn hsv2rgb(hsv: &HSV) -> Color {
 }
 type State = Vec<Square>;
 
-// pub struct View<'a, 'b> {
+// pub struct View<'ttf_module, 'rwops> {
 pub struct View {
     canvas: Canvas<Window>,
     lines: Vec<(Point, Point)>,
@@ -91,11 +116,11 @@ pub struct View {
     squares: Vec<Square>,
     window_size: i32,
     game_size: i32,
-    // font: Font<'a, 'b>,
-    // ttf_context: &'a Sdl2TtfContext,
+    // font: Option<Font<'ttf_module, 'rwops>>,
+    // ttf_context: Sdl2TtfContext,
 }
 
-// impl<'a, 'b> View<'a, 'b> {
+// impl<'ttf_module, 'rwops> View<'ttf_module, 'rwops> {
 impl View {
     pub fn new(
         sdl_context: &Sdl,
@@ -103,6 +128,7 @@ impl View {
         line_color: Color,
         game_size: i32,
         window_size: u32,
+        // ) -> View<'ttf_module, 'rwops> {
     ) -> View {
         let video_subsystem = sdl_context.video().unwrap();
 
@@ -122,8 +148,8 @@ impl View {
 
         // let ttf_context = sdl2::ttf::init().unwrap();
         // let font = ttf_context
-        // .load_font("fonts/DejaVuSansMono-Bold.ttf", 128)
-        // .unwrap();
+        //     .load_font("fonts/DejaVuSansMono-Bold.ttf", 128)
+        //     .unwrap();
         // t(&ttf_context);
 
         View {
@@ -134,8 +160,8 @@ impl View {
             squares: vec![],
             window_size,
             game_size,
-            // font,
-            // ttf_context: &ttf_context,
+            // font: None,
+            // ttf_context: ttf_context,
         }
     }
 
@@ -147,13 +173,9 @@ impl View {
             self.canvas.draw_line(line.0, line.1).unwrap();
         }
         for square in self.squares.iter() {
-            let color = hsv2rgb(&HSV {
-                h: square.value as f64 * 65.0,
-                s: 0.3,
-                v: 0.8,
-            });
-            square!(square, self, color);
+            square!(square, self);
         }
+
         self.canvas.present();
     }
 
