@@ -1,3 +1,20 @@
+//! Visualizer for the game 2048
+//!
+//! game_2048_view provides a graphical view for [the game 2048](https://en.wikipedia.org/wiki/2048_(video_game))
+//!
+//! # Requirements
+//!
+//! [rust-sdl2](https://github.com/Rust-SDL2/rust-sdl2)
+//!
+//! ## install packages
+//!
+//! libsdl2-2.0-0
+//! libsdl2-dev
+//! libsdl2-ttf-dev
+//!
+//! # Quick Start
+//!
+
 extern crate sdl2;
 
 use sdl2::pixels::Color;
@@ -79,11 +96,16 @@ macro_rules! square {
     };
 }
 
+/// Square represents each square with a value in the grid
+/// value is normally a power of 2
 pub struct Square {
     pub x: i32,
     pub y: i32,
     pub value: u32,
 }
+
+/// State is a list Squares that exist in the game
+pub type State = Vec<Square>;
 
 type Line = (Point, Point);
 
@@ -105,7 +127,6 @@ fn hsv2rgb(hsv: &HSV) -> Color {
     let mk = |a: [f64; 6]| ((a[hi] + m) * 255.0) as u8;
     Color::RGB(mk(ra), mk(ga), mk(ba))
 }
-type State = Vec<Square>;
 
 // pub struct View<'ttf_module, 'rwops> {
 pub struct View {
@@ -120,8 +141,42 @@ pub struct View {
     // ttf_context: Sdl2TtfContext,
 }
 
-// impl<'ttf_module, 'rwops> View<'ttf_module, 'rwops> {
+/// View is the visual reprensentation of the game.
+///
+/// To get started, here is an example of how to set up a new game
+/// ```
+/// extern crate sdl2;
+/// use game_2048_view::{View, State, Square};
+/// use sdl2::pixels::Color;
+///
+/// let sdl_context = sdl2::init().unwrap();
+/// let mut view = View::new(
+///     &sdl_context,
+///     Color::RGB(127,127,127), // background color is gray
+///     Color::RGB(0,0,0), // line color is black
+///     4, // game_size = 4x4 squares
+///     800, // window_size = 800x800 pixels
+/// );
+/// let state: State = vec![Square{x:0, y:0, value:2}];
+/// // a state with a single square with value 2 in the upper left corner
+/// view.update(state);
+/// view.draw();
+/// ```
 impl View {
+    /// ```
+    /// extern crate sdl2;
+    /// use game_2048_view::View;
+    /// use sdl2::pixels::Color;
+    ///
+    /// let sdl_context = sdl2::init().unwrap();
+    /// let mut view = View::new(
+    ///     &sdl_context,
+    ///     Color::RGB(127,127,127), // background color is gray
+    ///     Color::RGB(0,0,0), // line color is black
+    ///     4, // game_size = 4x4 squares
+    ///     800, // window_size = 800x800 pixels
+    /// );
+    /// ```
     pub fn new(
         sdl_context: &Sdl,
         bg_color: Color,
